@@ -21,14 +21,15 @@ SOCKET sck=-1;
 int szcount=0,shcount=0;
 struct RecvDataHeader hd;
 int datetime=20000101;
-unsigned char recvbuffer[80*1024];//接收缓冲
-unsigned char debuffer[5*1024*1024];//解压后缓冲
+unsigned char recvbuffer[5*1024*1024];//接收缓冲
+unsigned char debuffer[10*1024*1024];//解压后缓冲
 static struct tdx_infostyle info[16];
 
 bool busying=false;
 //创建线程代码：  
 DWORD   dwThreadId;    
 HANDLE   hThread   =   NULL;  
+FILE *flog = NULL;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReserved )
 {
@@ -37,6 +38,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReser
 	{
 		hThread=NULL;
 		sck=-1;
+		flog = fopen("gplog.txt", "w");
 	}
 
 	if (ul_reason_for_call == DLL_PROCESS_DETACH) //卸载
@@ -52,6 +54,12 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReser
 			closesocket(sck);   
 			sck=-1;
 		}   
+
+		if (flog != NULL)
+		{
+			fclose(flog);
+		}
+
 		busying=false;
 		WSACleanup();  
 	} 
@@ -80,35 +88,54 @@ void SaveRecvData()
 //接收数据
 bool RecvData(void)
 { 
-	if (sck==-1)
+	fprintf(flog, "开始RecvData\n");
+	if (sck == -1)
+	{
+		fprintf(flog, "错误：Socket为-1\n退出RecvData\n");
 		return false;
+	}
 
 
 	bool ret=false;
-	int hlen=sizeof(RecvDataHeader);
+	int hlen = sizeof(RecvDataHeader);
+	fprintf(flog, "开始接收消息头\n");
 	int len=recv(sck,(char *)&hd,hlen,0);// recvbuffer,hlen);
 	if (len!=hlen)
 	{
+		fprintf(flog, "错误：接收消息头长度错误len(%d) != hlen(%d)\n退出RecvData\n", len, hlen);
+		if (len == SOCKET_ERROR)
+		{
+			fprintf(flog, "recv错误：返回值=%d, 错误码=%d\n", len, WSAGetLastError());
+		}
 		linkclose();
 		return false;   
 	}
-	if (hd.CheckSum!=7654321)
+	if (hd.CheckSum != 7654321)
+	{
+		fprintf(flog, "错误：接收消息头checksum错误\n退出RecvData\n");
 		return false;
+	}
 	int elen=hd.Size;
-	int fcur=0;
+	int fcur = 0;
+
+	fprintf(flog, "开始接收消息体\n");
 	while(fcur<elen)
 	{
 		int len=recv(sck,(char *)recvbuffer+fcur,hlen,0);// sck->Receive(recvbuffer+fcur, elen - fcur);
 		if (len <0)
-		{ 
+		{
+			fprintf(flog, "recv错误：返回值%d，错误码%d\n退出RecvData\n", len, WSAGetLastError());
 			linkclose();
 			return false;
 		}
 		else
 			fcur = fcur +len;
 	}
-	if (fcur!=elen)
+	if (fcur != elen)
+	{
+		fprintf(flog, "错误：接收消息体长度错误\n退出RecvData\n");
 		return false;
+	}
 	if ((hd.EncodeMode & 0x10)==0x10)	
 	{
 		unsigned int long delen=hd.DePackSize;
@@ -314,6 +341,10 @@ extern "C" __declspec(dllexport) int linkServer(char *server,int port)
 	addrOFserver.sin_port=htons(port);   
 
 	connect(sck,(SOCKADDR*)&addrOFserver,sizeof(SOCKADDR)); 
+
+	int timeout = 10000;
+	setsockopt(sck, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
+	setsockopt(sck, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout));
 
 	unsigned char bb[]={0x0C,0x02,0x18,0x93,0x00,0x01,0x03,0x00,0x03,0x00,0x0D,0x00,0x01};
 
