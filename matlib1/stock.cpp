@@ -313,37 +313,7 @@ extern "C" __declspec(dllexport) int linkServer(char *server,int port)
 	addrOFserver.sin_family=AF_INET;   
 	addrOFserver.sin_port=htons(port);   
 
-	unsigned long ul = 1;
-	int ret = ioctlsocket(sck, FIONBIO, (unsigned long*)&ul);
-	if(ret==SOCKET_ERROR)
-		return -8;
-
-	connect(sck,(SOCKADDR*)&addrOFserver,sizeof(SOCKADDR)); //立即返回
-	//select 模型，即设置超时
-	struct timeval timeout ;
-	fd_set r;
-
-	FD_ZERO(&r);
-	FD_SET(sck, &r);
-	timeout.tv_sec = 15; //连接超时15秒
-	timeout.tv_usec =0;
-	ret = select(0, 0, &r, 0, &timeout);
-	if ( ret <= 0 )
-	{
-		::closesocket(sck);
-		sck=-1;
-		return -9;
-	}
-
-	//一般非阻塞模式套接比较难控制，可以根据实际情况考虑 再设回阻塞模式
-	unsigned long ul1= 0 ;
-	ret = ioctlsocket(sck, FIONBIO, (unsigned long*)&ul1);
-	if(ret==SOCKET_ERROR)
-	{
-		::closesocket (sck);
-		sck=-1;
-		return -10;
-	}
+	connect(sck,(SOCKADDR*)&addrOFserver,sizeof(SOCKADDR)); 
 
 	unsigned char bb[]={0x0C,0x02,0x18,0x93,0x00,0x01,0x03,0x00,0x03,0x00,0x0D,0x00,0x01};
 
