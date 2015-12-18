@@ -25,10 +25,10 @@ unsigned char recvbuffer[5*1024*1024];//接收缓冲
 unsigned char debuffer[10*1024*1024];//解压后缓冲
 static struct tdx_infostyle info[16];
 
-bool busying=false;
-//创建线程代码：  
-DWORD   dwThreadId;    
-HANDLE   hThread   =   NULL;  
+// bool busying=false;
+// //创建线程代码：  
+// DWORD   dwThreadId;    
+// HANDLE   hThread   =   NULL;  
 FILE *flog = NULL;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReserved )
@@ -36,18 +36,18 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReser
 
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)//加载
 	{
-		hThread=NULL;
+		//hThread=NULL;
 		sck=-1;
 		flog = fopen("gplog.txt", "w");
 	}
 
 	if (ul_reason_for_call == DLL_PROCESS_DETACH) //卸载
 	{
-		if (hThread!=NULL)
-		{
-			CloseHandle(hThread);  
-			hThread=NULL;
-		}
+// 		if (hThread!=NULL)
+// 		{
+// 			CloseHandle(hThread);  
+// 			hThread=NULL;
+// 		}
 
 		if (sck!=-1)
 		{
@@ -60,7 +60,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReser
 			fclose(flog);
 		}
 
-		busying=false;
+		//busying=false;
 		WSACleanup();  
 	} 
 
@@ -157,14 +157,14 @@ extern "C" __declspec(dllexport) int  linkclose()
 		sck=-1;
 	}   
 
-	if (hThread!=NULL)
-	{
-		TerminateThread(hThread, 0);
-		CloseHandle(hThread);  
-		hThread=NULL;
-		i=2;
-	}
-	busying=false;
+// 	if (hThread!=NULL)
+// 	{
+// 		TerminateThread(hThread, 0);
+// 		CloseHandle(hThread);  
+// 		hThread=NULL;
+// 		i=2;
+// 	}
+// 	busying=false;
 	WSACleanup();  
 	return i;
 }
@@ -175,59 +175,59 @@ extern "C" __declspec(dllexport) int  checklink()
 	return 0;
 }
 
-//线程函数  
-DWORD   __stdcall   ThreadFun(void   *)  
-{  
-	fprintf(flog, "ThreadFun开始\n");
-	busying=false;
-	while(true)
-	{
-		fprintf(flog, "ThreadFun循环开始\n");
-		if ((sck!=-1) && (busying==false))
-		{
-			busying=true;
-			unsigned char bb1[]="\x0C\x0D\x00\x2A\x00\x01\x3B\x00\x3B\x00\x26\x05\x05\x00\x01\x39"
-				"\x39\x39\x39\x39\x39\x5D\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x31"
-				"\x25\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x35\x10\x4A\x02\x00\x00"
-				"\x33\x39\x39\x33\x30\x30\x68\x4A\x02\x00\x00\x33\x39\x39\x30\x30"
-				"\x36\x10\x4A\x02\x00";
-			fprintf(flog, "ThreadFun循环发送心跳包\n");
-			if (send(sck, (char *)bb1, sizeof(bb1) - 1, 0) != SOCKET_ERROR)
-			{
-				fprintf(flog, "ThreadFun循环接收心跳包结果\n");
-				RecvData();
-			}
-			busying=false;
-		}
-		Sleep(4000);
-		fprintf(flog, "ThreadFun循环结束\n");
-	} 
-	hThread=NULL;
-	fprintf(flog, "ThreadFun结束\n");
-	return   0;  
-}   
-
-bool CreateTimer()
-{
-	hThread   =   CreateThread(NULL,0,ThreadFun,NULL,0,&dwThreadId);  
-	if   (hThread   ==   NULL)    
-		return false;
-	Sleep(1000);//等待线程创建好了  
-	return true;
-}
-
-bool DeleteTimer()
-{ 
-	//PostThreadMessage(dwThreadId,WM_USER+1,0,0);//给线程发消息准备退出线程 
-	if (hThread!=NULL)
-	{
-		TerminateThread(hThread, 0);
-		CloseHandle(hThread);  
-		hThread=NULL;
-	}
-
-	return true;
-}
+// 线程函数  
+// DWORD   __stdcall   ThreadFun(void   *)  
+// {  
+// 	fprintf(flog, "ThreadFun开始\n");
+// 	busying=false;
+// 	while(true)
+// 	{
+// 		fprintf(flog, "ThreadFun循环开始\n");
+// 		if ((sck!=-1) && (busying==false))
+// 		{
+// 			busying=true;
+// 			unsigned char bb1[]="\x0C\x0D\x00\x2A\x00\x01\x3B\x00\x3B\x00\x26\x05\x05\x00\x01\x39"
+// 				"\x39\x39\x39\x39\x39\x5D\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x31"
+// 				"\x25\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x35\x10\x4A\x02\x00\x00"
+// 				"\x33\x39\x39\x33\x30\x30\x68\x4A\x02\x00\x00\x33\x39\x39\x30\x30"
+// 				"\x36\x10\x4A\x02\x00";
+// 			fprintf(flog, "ThreadFun循环发送心跳包\n");
+// 			if (send(sck, (char *)bb1, sizeof(bb1) - 1, 0) != SOCKET_ERROR)
+// 			{
+// 				fprintf(flog, "ThreadFun循环接收心跳包结果\n");
+// 				RecvData();
+// 			}
+// 			busying=false;
+// 		}
+// 		Sleep(4000);
+// 		fprintf(flog, "ThreadFun循环结束\n");
+// 	} 
+// 	hThread=NULL;
+// 	fprintf(flog, "ThreadFun结束\n");
+// 	return   0;  
+// }   
+// 
+// bool CreateTimer()
+// {
+// 	hThread   =   CreateThread(NULL,0,ThreadFun,NULL,0,&dwThreadId);  
+// 	if   (hThread   ==   NULL)    
+// 		return false;
+// 	Sleep(1000);//等待线程创建好了  
+// 	return true;
+// }
+// 
+// bool DeleteTimer()
+// { 
+// 	//PostThreadMessage(dwThreadId,WM_USER+1,0,0);//给线程发消息准备退出线程 
+// 	if (hThread!=NULL)
+// 	{
+// 		TerminateThread(hThread, 0);
+// 		CloseHandle(hThread);  
+// 		hThread=NULL;
+// 	}
+// 
+// 	return true;
+// }
 
 //v 解包成年月日时分
 void TDXGetDate(DWORD v,int &yy,int &mm,int &dd,int &hhh,int &mmm)
@@ -366,8 +366,8 @@ extern "C" __declspec(dllexport) int linkServer(char *server,int port)
 		int *k=(int *)&debuffer[42];
 		datetime=*k;
 	}
-	if (datetime>0)
-		CreateTimer();  
+// 	if (datetime>0)
+// 		CreateTimer();  
 	return datetime;   
 }
 
@@ -395,11 +395,11 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 
 	if ((mark==1) && (CodeNum >= 880200))
 		zs=true;
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb1[]="\x0C\x01\x08\x64\x01\x01\x12\x00\x12\x00\x29\x05\xFF\x00\x31\x32\x33\x34\x35\x36\xFE\x00\x01\x00\xF1\xF2\xE1\xE2";
 	bb1[12]=mark;//市场0深圳 1上海
 	CopyMemory(&bb1[14],code,6);//股票代码
@@ -412,7 +412,7 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-		busying=false;
+// 		busying=false;
 		return -6;  
 	}
 	int DataLen=-5;
@@ -423,8 +423,9 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 
 		WORD *n=(WORD *)&debuffer[0];
 		if (*n<1)
-		{   busying=false;
-		return DataLen;
+		{   
+// 			busying=false;
+			return DataLen;
 		}
 		DataLen=*n;
 		int i=2;
@@ -464,7 +465,7 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 				break;
 		}
 	}
-	busying=false;
+// 	busying=false;
 	return DataLen;
 }
 
@@ -473,11 +474,11 @@ extern "C" __declspec(dllexport) int stockpklist(int count,int mark[],char *code
 	int ret=-1;
 	if (sck==-1)
 		return -1;
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb[800];
 	unsigned char bb2[]={0x0C,0x01,0x20,0x63,0x00,0x02,0x13,0x00,0x13,0x00,0x3E,0x05,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00};
 	CopyMemory(bb,bb2,sizeof(bb2));
@@ -500,7 +501,7 @@ extern "C" __declspec(dllexport) int stockpklist(int count,int mark[],char *code
 	if (send(sck,(char *)bb,i,0)== SOCKET_ERROR)
 	{
 		linkclose();
-		busying=false;
+// 		busying=false;
 		return -3;
 	}
 	if (RecvData()==1)
@@ -508,7 +509,7 @@ extern "C" __declspec(dllexport) int stockpklist(int count,int mark[],char *code
 		WORD *n=(WORD *)&debuffer[2];
 		if (*n<1)
 		{
-			busying=false;
+// 			busying=false;
 			return -4;
 		}
 		ret=*n;
@@ -604,7 +605,7 @@ extern "C" __declspec(dllexport) int stockpklist(int count,int mark[],char *code
 		}
 
 	}
-	busying=false;
+// 	busying=false;
 	return ret;
 }
 //取基金净值曲线数据
@@ -613,11 +614,11 @@ extern "C" __declspec(dllexport) int getiopv(int mark,char *code,double *out)
 	int ret=-1;
 	if (sck==-1)
 		return -1;
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 
 	unsigned char a[] ={ 0x0C, 0x26, 0x08, 0x00, 0x01, 0x01, 0x0E, 0x00, 0x0E, 0x00, 0x2E, 0x05, 0x00, 0x00, 0x31, 0x35, 0x39, 0x39, 0x32, 0x36, 0x00, 0x00, 0x00, 0x00 };
 	a[12] =mark;
@@ -625,15 +626,16 @@ extern "C" __declspec(dllexport) int getiopv(int mark,char *code,double *out)
 	if (send(sck,(char *)a,sizeof(a),0)== SOCKET_ERROR)
 	{
 		linkclose();
-		busying=false;
+// 		busying=false;
 		return -3;
 	}
 	if (RecvData()==1)
 	{
 		WORD *n=(WORD *)&debuffer[0];
 		if (*n<1)
-		{ busying=false;
-		return -4;
+		{ 
+// 			busying=false;
+			return -4;
 		}
 		char *buf=(char *)&debuffer[0];
 		ret=*n;
@@ -652,7 +654,7 @@ extern "C" __declspec(dllexport) int getiopv(int mark,char *code,double *out)
 			out[k++]=vol;
 		}
 	}
-	busying=false;
+// 	busying=false;
 	return ret;
 }
 
@@ -661,18 +663,18 @@ extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code
 	if (sck==-1)
 		return -1;
 
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb1[]="\x0C\x01\x20\x63\x00\x02\x13\x00\x13\x00\x3E\x05\x05\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x31\x32\x33\x34\x35\x36";
 	bb1[22]=mark;//市场0深圳 1上海
 	CopyMemory(&bb1[23],code,6);//股票代码
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-		busying=false;
+// 		busying=false;
 		return -3;
 	}
 	if (RecvData()==1)
@@ -680,7 +682,7 @@ extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code
 		WORD *n=(WORD *)&debuffer[2];
 		if (*n<1)
 		{
-			busying=false;
+// 			busying=false;
 			return -4;
 		}
 		char *buf=(char *)&debuffer[4];
@@ -762,10 +764,10 @@ extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code
 		out[31]=(float)(t/100.0);
 		out[32]=d2;
 		TDXGetInt16(buf,i,i);
-		busying=false;
+// 		busying=false;
 		return 1;
 	}
-	busying=false;
+// 	busying=false;
 	return -5;
 }
 
@@ -797,12 +799,12 @@ extern "C" __declspec(dllexport) int savecodelist()
 	GetCurrentDirectory(255,sPath1);
 
 	char *filename=strcat(sPath1,"\\codelist.csv");
-
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb[]="\x0C\x0C\x18\x6C\x00\x01\x08\x00\x08\x00\x4E\x04\xFF\x00\x01\x02\x03\x04";//取得股票数量
 	bb[12]=0;//0深圳 1上海
 	int *dt=(int *)&bb[14];
@@ -810,7 +812,7 @@ extern "C" __declspec(dllexport) int savecodelist()
 	if (send(sck,(char *)bb,sizeof(bb)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-		busying=false;
+// 		busying=false;
 		return -3;
 	}
 	Sleep(20);
@@ -823,7 +825,7 @@ extern "C" __declspec(dllexport) int savecodelist()
 		HFILE  f=_lcreat(LPCSTR(filename),0);
 		if (f==HFILE_ERROR)
 		{
-			busying=false;
+// 			busying=false;
 			return -10;
 		}
 		int k=0;
@@ -837,7 +839,7 @@ extern "C" __declspec(dllexport) int savecodelist()
 			if (send(sck,(char *)bb11,sizeof(bb11)-1,0)== SOCKET_ERROR)
 			{
 				linkclose();
-			busying=false;
+// 			busying=false;
 				return -3;
 			}  
 			Sleep(20);
@@ -867,10 +869,10 @@ extern "C" __declspec(dllexport) int savecodelist()
 				break;
 		}
 		_lclose(f);
-		busying=false;
+// 		busying=false;
 		return szlen;
 	}
-	busying=false;
+// 	busying=false;
 	return -6;
 }
 
@@ -879,11 +881,11 @@ extern "C" __declspec(dllexport) int stockcaiwu(double *out,int mark,char *code)
 {
 	if (sck==-1)
 		return -1;
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb1[]="\x0C\x1F\x18\x76\x00\x01\x0B\x00\x0B\x00\x10\x00\xDD\x00\xFF\x31\x32\x33\x34\x35\x36";
 	bb1[12]=1;//数量
 	bb1[14]=mark;//市场0深圳 1上海
@@ -891,7 +893,7 @@ extern "C" __declspec(dllexport) int stockcaiwu(double *out,int mark,char *code)
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-	busying=false;
+// 	busying=false;
 		return -3;
 	}
 	if (RecvData()==1)
@@ -899,7 +901,7 @@ extern "C" __declspec(dllexport) int stockcaiwu(double *out,int mark,char *code)
 		WORD *n=(WORD *)&debuffer[0];
 		if (*n==0)
 		{
-			busying=false;
+// 			busying=false;
 			return -5;
 		}
 
@@ -909,10 +911,10 @@ extern "C" __declspec(dllexport) int stockcaiwu(double *out,int mark,char *code)
 		out[2]=cw->day2;
 		for (int t=0;t<30;t++)
 			out[3+t]=cw->zl[t];
-		busying=false;
+// 		busying=false;
 		return 1;
 	}
-	busying=false;
+// 	busying=false;
 	return -4;
 }
 
@@ -921,11 +923,11 @@ extern "C" __declspec(dllexport) int stockquan(double *out,int mark,char *code)
 {
 	if (sck==-1)
 		return -1;
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb1[]="\x0C\x1F\x18\x76\x00\x01\x0B\x00\x0B\x00\x0F\x00\xDD\x00\xFF\x31\x32\x33\x34\x35\x36";
 	bb1[12]=1;//数量
 	bb1[14]=mark;//市场0深圳 1上海
@@ -933,7 +935,7 @@ extern "C" __declspec(dllexport) int stockquan(double *out,int mark,char *code)
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-	    busying=false;
+// 	    busying=false;
 		return -3;
 	}  
 	int datalen=-4;
@@ -942,7 +944,7 @@ extern "C" __declspec(dllexport) int stockquan(double *out,int mark,char *code)
 		WORD *n=(WORD *)&debuffer[0];
 		if (*n==0)
 		{
-			busying=false;
+// 			busying=false;
 			return -5;
 		}
 		int i=2;
@@ -978,10 +980,10 @@ extern "C" __declspec(dllexport) int stockquan(double *out,int mark,char *code)
 			}
 		}
 		datalen=t3;
-	    busying=false;
+// 	    busying=false;
 		return datalen;
 	}
-    busying=false;
+//     busying=false;
 	return -4;
 }
 
@@ -998,18 +1000,18 @@ extern "C" __declspec(dllexport) int getinfo(int mark,char *code,int type1,char 
 {
 	if (sck==-1)
 		return -1;
-	while(busying)
-	{
-
-	}
-	busying=true;
+// 	while(busying)
+// 	{
+// 
+// 	}
+// 	busying=true;
 	unsigned char bb1[]="\x0C\x0F\x10\x9B\x00\x01\x0E\x00\x0E\x00\xCF\x02\x00\xFF\x31\x32\x33\x34\x35\x36\x00\x00\x00\x00";
 	bb1[13]=mark;//市场0深圳 1上海
 	CopyMemory(&bb1[14],code,6);//股票代码
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-		busying=false;
+// 		busying=false;
 		return -3;
 	}  
 	int ret=-1;
@@ -1019,7 +1021,7 @@ extern "C" __declspec(dllexport) int getinfo(int mark,char *code,int type1,char 
 		WORD *n=(WORD *)&debuffer[0];
 		if (*n<1)
 		{
-			busying=false;
+// 			busying=false;
 			return -2;
 		}
 		ret=*n;
@@ -1067,7 +1069,7 @@ extern "C" __declspec(dllexport) int getinfo(int mark,char *code,int type1,char 
 				if (send(sck,(char *)bb2,sizeof(bb2)-1,0)== SOCKET_ERROR)
 				{
 					linkclose();
-					busying=false;
+// 					busying=false;
 					return -3;
 				}  
 				if (RecvData()==1)
@@ -1095,6 +1097,6 @@ extern "C" __declspec(dllexport) int getinfo(int mark,char *code,int type1,char 
 			ret=-6;
 	}
 
-	busying=false;
+// 	busying=false;
 	return ret;
 }
