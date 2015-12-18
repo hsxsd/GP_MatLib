@@ -178,9 +178,11 @@ extern "C" __declspec(dllexport) int  checklink()
 //线程函数  
 DWORD   __stdcall   ThreadFun(void   *)  
 {  
+	fprintf(flog, "ThreadFun开始\n");
 	busying=false;
 	while(true)
 	{
+		fprintf(flog, "ThreadFun循环开始\n");
 		if ((sck!=-1) && (busying==false))
 		{
 			busying=true;
@@ -189,13 +191,19 @@ DWORD   __stdcall   ThreadFun(void   *)
 				"\x25\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x35\x10\x4A\x02\x00\x00"
 				"\x33\x39\x39\x33\x30\x30\x68\x4A\x02\x00\x00\x33\x39\x39\x30\x30"
 				"\x36\x10\x4A\x02\x00";
-			if (send(sck,(char *)bb1,sizeof(bb1)-1,0)!= SOCKET_ERROR)
+			fprintf(flog, "ThreadFun循环发送心跳包\n");
+			if (send(sck, (char *)bb1, sizeof(bb1) - 1, 0) != SOCKET_ERROR)
+			{
+				fprintf(flog, "ThreadFun循环接收心跳包结果\n");
 				RecvData();
+			}
 			busying=false;
 		}
 		Sleep(4000);
+		fprintf(flog, "ThreadFun循环结束\n");
 	} 
 	hThread=NULL;
+	fprintf(flog, "ThreadFun结束\n");
 	return   0;  
 }   
 
@@ -368,7 +376,7 @@ extern "C" __declspec(dllexport) int link()
 	return linkServer("218.18.103.38",7709);
 }
 
-extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,int count,int zq)
+extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,int start, int count,int zq)
 {
 	if (sck==NULL)
 		return -1;
@@ -397,7 +405,7 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 	CopyMemory(&bb1[14],code,6);//股票代码
 	bb1[20]=zq;//周期
 	WORD *start1=(WORD *)&bb1[24];
-	*start1=0;//开始值
+	*start1=start;//开始值
 	WORD *count1=(WORD *)&bb1[26];
 	*count1=count;//开始值
 

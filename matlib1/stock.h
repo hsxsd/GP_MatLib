@@ -190,7 +190,7 @@ extern "C" __declspec(dllexport) int linkServer(char *server,int port);//Á¬½ÓÖ¸¶
 extern "C" __declspec(dllexport) int savecodelist();
 extern "C" __declspec(dllexport) int linkclose();//¹Ø±ÕÁ¬½Ó
 extern "C" __declspec(dllexport) int getlist(double *list,int count);
-extern "C" __declspec(dllexport) int gethistory(double *out, int mark,char *code,int count,int zq);//¶ÁÈ¡ÀúÊ·Êı¾İ,mark=ÊĞ³¡(0=ÉîÛÚ£¬1=ÉÏº££© code=´úÂë count=ÊıÁ¿£¨´ÓºóÍùÇ°¼ÆËã£¬×î´ó 800£© zq=ÖÜÆÚ
+extern "C" __declspec(dllexport) int gethistory(double *out, int mark,char *code,int start, int count,int zq);//¶ÁÈ¡ÀúÊ·Êı¾İ,mark=ÊĞ³¡(0=ÉîÛÚ£¬1=ÉÏº££© code=´úÂë count=ÊıÁ¿£¨´ÓºóÍùÇ°¼ÆËã£¬×î´ó 800£© zq=ÖÜÆÚ
 extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code);//¶ÁÈ¡ÊµÊ±±¨¼Û,mark=ÊĞ³¡ code=´úÂë 
 extern "C" __declspec(dllexport) int stockcaiwu(double *out,int mark,char *code);//¶ÁÈ¡²ÆÎñÊı¾İ,mark=ÊĞ³¡ code=´úÂë
 extern "C" __declspec(dllexport) int stockquan(double *out,int mark,char *code);//¶ÁÈ¡È¨Ï¢Êı¾İ,mark=ÊĞ³¡ code=´úÂë
