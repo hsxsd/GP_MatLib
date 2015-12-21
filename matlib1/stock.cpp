@@ -25,10 +25,10 @@ unsigned char recvbuffer[5*1024*1024];//接收缓冲
 unsigned char debuffer[10*1024*1024];//解压后缓冲
 static struct tdx_infostyle info[16];
 
-// bool busying=false;
-// //创建线程代码：  
-// DWORD   dwThreadId;    
-// HANDLE   hThread   =   NULL;  
+bool busying=false;
+//创建线程代码：  
+DWORD   dwThreadId;    
+HANDLE   hThread   =   NULL;  
 FILE *flog = NULL;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReserved )
@@ -36,18 +36,18 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReser
 
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)//加载
 	{
-		//hThread=NULL;
+		hThread=NULL;
 		sck=-1;
 		flog = fopen("gplog.txt", "w");
 	}
 
 	if (ul_reason_for_call == DLL_PROCESS_DETACH) //卸载
 	{
-// 		if (hThread!=NULL)
-// 		{
-// 			CloseHandle(hThread);  
-// 			hThread=NULL;
-// 		}
+		if (hThread!=NULL)
+		{
+			CloseHandle(hThread);  
+			hThread=NULL;
+		}
 
 		if (sck!=-1)
 		{
@@ -60,7 +60,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call,LPVOID lpReser
 			fclose(flog);
 		}
 
-		//busying=false;
+		busying=false;
 		WSACleanup();  
 	} 
 
@@ -157,13 +157,13 @@ extern "C" __declspec(dllexport) int  linkclose()
 		sck=-1;
 	}   
 
-// 	if (hThread!=NULL)
-// 	{
-// 		TerminateThread(hThread, 0);
-// 		CloseHandle(hThread);  
-// 		hThread=NULL;
-// 		i=2;
-// 	}
+	if (hThread!=NULL)
+	{
+		TerminateThread(hThread, 0);
+		CloseHandle(hThread);  
+		hThread=NULL;
+		i=2;
+	}
 // 	busying=false;
 	WSACleanup();  
 	return i;
@@ -176,58 +176,58 @@ extern "C" __declspec(dllexport) int  checklink()
 }
 
 // 线程函数  
-// DWORD   __stdcall   ThreadFun(void   *)  
-// {  
-// 	fprintf(flog, "ThreadFun开始\n");
-// 	busying=false;
-// 	while(true)
-// 	{
-// 		fprintf(flog, "ThreadFun循环开始\n");
-// 		if ((sck!=-1) && (busying==false))
-// 		{
-// 			busying=true;
-// 			unsigned char bb1[]="\x0C\x0D\x00\x2A\x00\x01\x3B\x00\x3B\x00\x26\x05\x05\x00\x01\x39"
-// 				"\x39\x39\x39\x39\x39\x5D\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x31"
-// 				"\x25\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x35\x10\x4A\x02\x00\x00"
-// 				"\x33\x39\x39\x33\x30\x30\x68\x4A\x02\x00\x00\x33\x39\x39\x30\x30"
-// 				"\x36\x10\x4A\x02\x00";
-// 			fprintf(flog, "ThreadFun循环发送心跳包\n");
-// 			if (send(sck, (char *)bb1, sizeof(bb1) - 1, 0) != SOCKET_ERROR)
-// 			{
-// 				fprintf(flog, "ThreadFun循环接收心跳包结果\n");
-// 				RecvData();
-// 			}
-// 			busying=false;
-// 		}
-// 		Sleep(4000);
-// 		fprintf(flog, "ThreadFun循环结束\n");
-// 	} 
-// 	hThread=NULL;
-// 	fprintf(flog, "ThreadFun结束\n");
-// 	return   0;  
-// }   
-// 
-// bool CreateTimer()
-// {
-// 	hThread   =   CreateThread(NULL,0,ThreadFun,NULL,0,&dwThreadId);  
-// 	if   (hThread   ==   NULL)    
-// 		return false;
-// 	Sleep(1000);//等待线程创建好了  
-// 	return true;
-// }
-// 
-// bool DeleteTimer()
-// { 
-// 	//PostThreadMessage(dwThreadId,WM_USER+1,0,0);//给线程发消息准备退出线程 
-// 	if (hThread!=NULL)
-// 	{
-// 		TerminateThread(hThread, 0);
-// 		CloseHandle(hThread);  
-// 		hThread=NULL;
-// 	}
-// 
-// 	return true;
-// }
+DWORD   __stdcall   ThreadFun(void   *)  
+{  
+	fprintf(flog, "ThreadFun开始\n");
+	busying=false;
+	while(true)
+	{
+		fprintf(flog, "ThreadFun循环开始\n");
+		if ((sck!=-1) && (busying==false))
+		{
+			//busying=true;
+			unsigned char bb1[]="\x0C\x0D\x00\x2A\x00\x01\x3B\x00\x3B\x00\x26\x05\x05\x00\x01\x39"
+				"\x39\x39\x39\x39\x39\x5D\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x31"
+				"\x25\x4A\x02\x00\x00\x33\x39\x39\x30\x30\x35\x10\x4A\x02\x00\x00"
+				"\x33\x39\x39\x33\x30\x30\x68\x4A\x02\x00\x00\x33\x39\x39\x30\x30"
+				"\x36\x10\x4A\x02\x00";
+			fprintf(flog, "ThreadFun循环发送心跳包\n");
+			if (send(sck, (char *)bb1, sizeof(bb1) - 1, 0) != SOCKET_ERROR)
+			{
+				fprintf(flog, "ThreadFun循环接收心跳包结果\n");
+				RecvData();
+			}
+			busying=false;
+		}
+		Sleep(4000);
+		fprintf(flog, "ThreadFun循环结束\n");
+	} 
+	hThread=NULL;
+	fprintf(flog, "ThreadFun结束\n");
+	return   0;  
+}   
+
+bool CreateTimer()
+{
+	hThread   =   CreateThread(NULL,0,ThreadFun,NULL,0,&dwThreadId);  
+	if   (hThread   ==   NULL)    
+		return false;
+	Sleep(1000);//等待线程创建好了  
+	return true;
+}
+
+bool DeleteTimer()
+{ 
+	//PostThreadMessage(dwThreadId,WM_USER+1,0,0);//给线程发消息准备退出线程 
+	if (hThread!=NULL)
+	{
+		TerminateThread(hThread, 0);
+		CloseHandle(hThread);  
+		hThread=NULL;
+	}
+
+	return true;
+}
 
 //v 解包成年月日时分
 void TDXGetDate(DWORD v,int &yy,int &mm,int &dd,int &hhh,int &mmm)
@@ -366,8 +366,8 @@ extern "C" __declspec(dllexport) int linkServer(char *server,int port)
 		int *k=(int *)&debuffer[42];
 		datetime=*k;
 	}
-// 	if (datetime>0)
-// 		CreateTimer();  
+	if (datetime>0)
+		CreateTimer();  
 	return datetime;   
 }
 
