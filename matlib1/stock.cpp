@@ -92,6 +92,7 @@ bool RecvData(void)
 	if (sck == -1)
 	{
 		fprintf(flog, "错误：Socket为-1\n退出RecvData\n");
+		fflush(flog);
 		return false;
 	}
 
@@ -108,11 +109,13 @@ bool RecvData(void)
 			fprintf(flog, "recv错误：返回值=%d, 错误码=%d\n", len, WSAGetLastError());
 		}
 		linkclose();
+		fflush(flog);
 		return false;   
 	}
 	if (hd.CheckSum != 7654321)
 	{
 		fprintf(flog, "错误：接收消息头checksum错误\n退出RecvData\n");
+		fflush(flog);
 		return false;
 	}
 	int elen=hd.Size;
@@ -126,6 +129,7 @@ bool RecvData(void)
 		{
 			fprintf(flog, "recv错误：返回值%d，错误码%d\n退出RecvData\n", len, WSAGetLastError());
 			linkclose();
+			fflush(flog);
 			return false;
 		}
 		else
@@ -134,17 +138,22 @@ bool RecvData(void)
 	if (fcur != elen)
 	{
 		fprintf(flog, "错误：接收消息体长度错误\n退出RecvData\n");
+		fflush(flog);
 		return false;
 	}
 	if ((hd.EncodeMode & 0x10)==0x10)	
 	{
 		unsigned int long delen=hd.DePackSize;
 		int  err=uncompress(debuffer,&delen,recvbuffer,hd.Size);
-		if(err!=0)//解压错误
+		if (err != 0)//解压错误
+		{
+			fflush(flog);
 			return false;
+		}
 	}
 	else
 		CopyMemory(debuffer,recvbuffer,hd.Size);
+	fflush(flog);
 	return true;
 }
 
@@ -166,6 +175,7 @@ extern "C" __declspec(dllexport) int  linkclose()
 // 	}
 // 	busying=false;
 	WSACleanup();  
+	fflush(flog);
 	return i;
 }
 
@@ -201,10 +211,12 @@ extern "C" __declspec(dllexport) int  checklink()
 // 		}
 // 		Sleep(4000);
 // 		fprintf(flog, "ThreadFun循环结束\n");
+//		fflush(flog);
 // 	} 
 // 	hThread=NULL;
 // 	fprintf(flog, "ThreadFun结束\n");
-// 	return   0;  
+// 	fflush(flog);
+//	return   0;
 // }   
 // 
 // bool CreateTimer()
