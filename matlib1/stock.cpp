@@ -699,7 +699,15 @@ extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code
 		}
 		char *buf=(char *)&debuffer[4];
 		int i=9;  
+
 		float dd=100.0;
+		if (code[0] == '5' &&
+			code[1] == '1' &&
+			(code[2] == '0' || code[2] == '1' || code[2] == '2' || code[2] == '3'))
+		{
+			dd = 1000.0;
+		}
+
 		float prize=TDXDecode(buf, i, i) / dd;
 		out[0]= prize;
 		//float last =
