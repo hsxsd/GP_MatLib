@@ -368,11 +368,17 @@ extern "C" __declspec(dllexport) int linkServer(char *server,int port)
 
 	unsigned char bb[]={0x0C,0x02,0x18,0x93,0x00,0x01,0x03,0x00,0x03,0x00,0x0D,0x00,0x01};
 
+	fprintf(flog, "linkServer发送数据0x0C,0x02,0x18,0x93,0x00,0x01,0x03,0x00,0x03,0x00,0x0D,0x00,0x01\n");
+	fflush(flog);
 	if (send(sck,(char*)bb,sizeof(bb),0)== SOCKET_ERROR)
 	{
 		linkclose();
+		fprintf(flog, "linkServer发送数据失败\n");
+		fflush(flog);
 		return -5;
 	}
+	fprintf(flog, "linkServer发送数据成功\n");
+	fflush(flog);
 	if (RecvData()==1)
 	{
 		int *k=(int *)&debuffer[42];
@@ -421,12 +427,18 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 	WORD *count1=(WORD *)&bb1[26];
 	*count1=count;//开始值
 
+	fprintf(flog, "getHistory发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 		busying=false;
+		// 		busying=false;
+		fprintf(flog, "getHistory发送数据失败\n");
+		fflush(flog);
 		return -6;  
 	}
+	fprintf(flog, "getHistory发送成功\n");
+	fflush(flog);
 	int DataLen=-5;
 	if (RecvData()==1)
 	{
@@ -509,13 +521,19 @@ extern "C" __declspec(dllexport) int stockpklist(int count,int mark[],char *code
 	WORD *size1=(WORD *)&bb[6];
 	*size1=len;
 	WORD *size2=(WORD *)&bb[8];
-	*size2=len;
+	*size2 = len;
+	fprintf(flog, "stkpklist发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb,i,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 		busying=false;
+		// 		busying=false;
+		fprintf(flog, "stkpklist发送数据失败\n");
+		fflush(flog);
 		return -3;
 	}
+	fprintf(flog, "stkpklist发送数据成功\n");
+	fflush(flog);
 	if (RecvData()==1)
 	{
 		WORD *n=(WORD *)&debuffer[2];
@@ -634,13 +652,19 @@ extern "C" __declspec(dllexport) int getiopv(int mark,char *code,double *out)
 
 	unsigned char a[] ={ 0x0C, 0x26, 0x08, 0x00, 0x01, 0x01, 0x0E, 0x00, 0x0E, 0x00, 0x2E, 0x05, 0x00, 0x00, 0x31, 0x35, 0x39, 0x39, 0x32, 0x36, 0x00, 0x00, 0x00, 0x00 };
 	a[12] =mark;
-	CopyMemory(&a[14],code,6);//股票代码
+	CopyMemory(&a[14], code, 6);//股票代码
+	fprintf(flog, "getiopv发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)a,sizeof(a),0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 		busying=false;
+		// 		busying=false;
+		fprintf(flog, "getiopv发送数据失败\n");
+		fflush(flog);
 		return -3;
 	}
+	fprintf(flog, "getiopv发送数据成功\n");
+	fflush(flog);
 	if (RecvData()==1)
 	{
 		WORD *n=(WORD *)&debuffer[0];
@@ -682,13 +706,19 @@ extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code
 // 	busying=true;
 	unsigned char bb1[]="\x0C\x01\x20\x63\x00\x02\x13\x00\x13\x00\x3E\x05\x05\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x31\x32\x33\x34\x35\x36";
 	bb1[22]=mark;//市场0深圳 1上海
-	CopyMemory(&bb1[23],code,6);//股票代码
+	CopyMemory(&bb1[23], code, 6);//股票代码
+	fprintf(flog, "stockpkbase发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 		busying=false;
+		// 		busying=false;
+		fprintf(flog, "stockpkbase发送数据失败\n");
+		fflush(flog);
 		return -3;
 	}
+	fprintf(flog, "stockpkbase发送数据成功\n");
+	fflush(flog);
 	if (RecvData()==1)
 	{
 		WORD *n=(WORD *)&debuffer[2];
@@ -828,13 +858,19 @@ extern "C" __declspec(dllexport) int savecodelist()
 	unsigned char bb[]="\x0C\x0C\x18\x6C\x00\x01\x08\x00\x08\x00\x4E\x04\xFF\x00\x01\x02\x03\x04";//取得股票数量
 	bb[12]=0;//0深圳 1上海
 	int *dt=(int *)&bb[14];
-	*dt=datetime;
+	*dt = datetime;
+	fprintf(flog, "savecodelist发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb,sizeof(bb)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 		busying=false;
+		// 		busying=false;
+		fprintf(flog, "savecodelist发送数据失败\n");
+		fflush(flog);
 		return -3;
 	}
+	fprintf(flog, "savecodelist发送数据成功\n");
+	fflush(flog);
 	Sleep(20);
 	if (RecvData()==1)
 	{
@@ -910,12 +946,18 @@ extern "C" __declspec(dllexport) int stockcaiwu(double *out,int mark,char *code)
 	bb1[12]=1;//数量
 	bb1[14]=mark;//市场0深圳 1上海
 	CopyMemory(&bb1[15],code,6);//股票代码
+	fprintf(flog, "stockcaiwu发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 	busying=false;
+		// 	busying=false;
+		fprintf(flog, "stockcaiwu发送数据失败\n");
+		fflush(flog);
 		return -3;
 	}
+	fprintf(flog, "stockcaiwu发送数据成功\n");
+	fflush(flog);
 	if (RecvData()==1)
 	{
 		WORD *n=(WORD *)&debuffer[0];
@@ -952,12 +994,18 @@ extern "C" __declspec(dllexport) int stockquan(double *out,int mark,char *code)
 	bb1[12]=1;//数量
 	bb1[14]=mark;//市场0深圳 1上海
 	CopyMemory(&bb1[15],code,6);//股票代码
+	fprintf(flog, "stockquan发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 	    busying=false;
+		// 	    busying=false;
+		fprintf(flog, "stockquan发送数据失败\n");
+		fflush(flog);
 		return -3;
-	}  
+	}
+	fprintf(flog, "stockquan发送数据成功\n");
+	fflush(flog);
 	int datalen=-4;
 	if (RecvData()==1)
 	{  
@@ -1028,12 +1076,18 @@ extern "C" __declspec(dllexport) int getinfo(int mark,char *code,int type1,char 
 	unsigned char bb1[]="\x0C\x0F\x10\x9B\x00\x01\x0E\x00\x0E\x00\xCF\x02\x00\xFF\x31\x32\x33\x34\x35\x36\x00\x00\x00\x00";
 	bb1[13]=mark;//市场0深圳 1上海
 	CopyMemory(&bb1[14],code,6);//股票代码
+	fprintf(flog, "getinfo发送数据\n");
+	fflush(flog);
 	if (send(sck,(char *)bb1,sizeof(bb1)-1,0)== SOCKET_ERROR)
 	{
 		linkclose();
-// 		busying=false;
+		// 		busying=false;
+		fprintf(flog, "getinfo发送数据失败\n");
+		fflush(flog);
 		return -3;
-	}  
+	}
+	fprintf(flog, "getinfo发送数据成功\n");
+	fflush(flog);
 	int ret=-1;
 	if (RecvData()==1)
 	{
