@@ -89,6 +89,7 @@ void SaveRecvData()
 bool RecvData(void)
 { 
 	fprintf(flog, "开始RecvData\n");
+	fflush(flog);
 	if (sck == -1)
 	{
 		fprintf(flog, "错误：Socket为-1\n退出RecvData\n");
@@ -100,16 +101,18 @@ bool RecvData(void)
 	bool ret=false;
 	int hlen = sizeof(RecvDataHeader);
 	fprintf(flog, "开始接收消息头\n");
+	fflush(flog);
 	int len=recv(sck,(char *)&hd,hlen,0);// recvbuffer,hlen);
 	if (len!=hlen)
 	{
 		fprintf(flog, "错误：接收消息头长度错误len(%d) != hlen(%d)\n退出RecvData\n", len, hlen);
+		fflush(flog);
 		if (len == SOCKET_ERROR)
 		{
 			fprintf(flog, "recv错误：返回值=%d, 错误码=%d\n", len, WSAGetLastError());
+			fflush(flog);
 		}
 		linkclose();
-		fflush(flog);
 		return false;   
 	}
 	if (hd.CheckSum != 7654321)
@@ -122,14 +125,15 @@ bool RecvData(void)
 	int fcur = 0;
 
 	fprintf(flog, "开始接收消息体\n");
+	fflush(flog);
 	while(fcur<elen)
 	{
 		int len=recv(sck,(char *)recvbuffer+fcur,hlen,0);// sck->Receive(recvbuffer+fcur, elen - fcur);
 		if (len <0)
 		{
 			fprintf(flog, "recv错误：返回值%d，错误码%d\n退出RecvData\n", len, WSAGetLastError());
-			linkclose();
 			fflush(flog);
+			linkclose();
 			return false;
 		}
 		else
@@ -147,13 +151,11 @@ bool RecvData(void)
 		int  err=uncompress(debuffer,&delen,recvbuffer,hd.Size);
 		if (err != 0)//解压错误
 		{
-			fflush(flog);
 			return false;
 		}
 	}
 	else
 		CopyMemory(debuffer,recvbuffer,hd.Size);
-	fflush(flog);
 	return true;
 }
 
@@ -175,7 +177,6 @@ extern "C" __declspec(dllexport) int  linkclose()
 // 	}
 // 	busying=false;
 	WSACleanup();  
-	fflush(flog);
 	return i;
 }
 
