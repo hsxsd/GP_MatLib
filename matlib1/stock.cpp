@@ -445,6 +445,8 @@ extern "C" __declspec(dllexport) int gethistory(double *out,int mark,char *code,
 	{
 		//SaveRecvData();
 		int len=hd.DePackSize;
+		fprintf(flog, "接收数据长度%d\n", len);
+		fflush(flog);
 
 		WORD *n=(WORD *)&debuffer[0];
 		if (*n<1)
@@ -732,9 +734,29 @@ extern "C" __declspec(dllexport) int stockpkbase(double *out,int mark,char *code
 		int i=9;  
 
 		float dd=100.0;
+		// 500000 ~ 519999
 		if (code[0] == '5' &&
-			code[1] == '1' &&
-			(code[2] == '0' || code[2] == '1' || code[2] == '2' || code[2] == '3'))
+			(code[1] == '0' || code[1] == '1'))
+		{
+			dd = 1000.0;
+		}
+		// 150xxx, 151xxx, 159xxx
+		if (code[0] == '1' &&
+			code[1] == '5' &&
+			(code[2] == '0' || code[2] == '1' || code[2] == '9'))
+		{
+			dd = 1000.0;
+		}
+		// 16***
+		if (code[0] == '1' &&
+			code[1] == '6')
+		{
+			dd = 1000.0;
+		}
+		// 184xxx
+		if (code[0] == '1' &&
+			code[1] == '8' &&
+			code[2] == '4')
 		{
 			dd = 1000.0;
 		}
